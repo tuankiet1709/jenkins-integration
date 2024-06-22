@@ -38,6 +38,10 @@ const products = [{
   "id": 9,
   "product_name": "Sugar - Brown, Individual",
   "quantity": 81
+}, {
+  "id": 10,
+  "product_name": "Rice - White",
+  "quantity": 81
 }]
 
 // set up dependencies
@@ -63,7 +67,7 @@ app.use('/api/', router);
 // set up route
 app.get('/', (req, res) => {
   res.status(200).json({
-    message: 'Welcome to Project with Nodejs Express and MongoDB',
+    message: 'Welcome to Project with Nodejs Express',
   });
 });
 app.listen(port, () => {
