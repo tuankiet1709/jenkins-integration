@@ -1,93 +1,52 @@
-def skipRemainingStages = false
-
 pipeline {
     agent any
-
-    environment {
-        BRANCH_NAME = ''
-    }
-
+    
     stages {
-        stage('Read JSON') {
+        stage('configuration') {
             steps {
-                script {
-                    def payload = env.payload
-                    if (payload.contains('"opened"')) {
-                        def jsonSlurper = new groovy.json.JsonSlurper()
-                        def jsonObject = jsonSlurper.parseText(payload)
-                        env.GIT_HASH = jsonObject.pull_request.head.sha
-                        env.PULL_REQUEST_NUMBER = jsonObject.pull_request.number
-                    } else if (payload.contains('"closed"')) {
-                        echo 'Pull request merged successfully!'
-                        // sendPullRequestClosedEmail()
-                        currentBuild.result = 'SUCCESS'
-                        skipRemainingStages = true
-                    } else {
-                        error("Payload is empty or null.")
-                    }
-                }
+                echo 'BRANCH NAME: ' + env.BRANCH_NAME
+                echo sh(returnStdout: true, script: 'env')
             }
         }
-        stage('Checkout') {
+        
+        stage("build"){
             when {
-                expression {
-                    !skipRemainingStages
-                }
+                branch 'main'
             }
-            steps {
-                script {
-                    sh "git checkout ${env.GIT_HASH}"
-                }
+            
+            steps{
+                sh 'echo "Build Started"'
             }
         }
 
-        stage('Manual Approval') {
+        stage("Deploy"){
             when {
-                expression {
-                    !skipRemainingStages
-                }
+                branch 'main'
             }
-            steps {
-                script {
-                    approved = input(
-                        message: 'Proceed with the Merge?',
-                        parameters: [
-                            choice(name: 'ACTION', choices: 'Yes\nNo', description: 'Choose whether to proceed or not')
-                        ]
-                    )
-                    if (approved == 'Yes') {
-                        echo 'Deployment approved!'
-                        acceptPullRequest()
-                    } else {
-                        error 'Deployment aborted!'
-                    }
-                }
+            
+            steps{
+                sh 'echo "Deploying App"'
             }
         }
     }
-}
-
-def acceptPullRequest() {
-    withCredentials([string(credentialsId: 'github-token', variable: 'GITHUB_TOKEN')]) {
-        def response = sh(script: "curl -X PUT -H 'Authorization: token ${GITHUB_TOKEN}' -H 'Accept: application/vnd.github.v3+json' 'https://api.github.com/repos/<GITHUB_ACCOUNT_NAME>/<GITHUB_REPO_NAME>/pulls/${env.PULL_REQUEST_NUMBER}/merge'", returnStdout: true)
-        if (response.contains('"merged": true')) {
-            echo 'Pull request merged successfully!'
-            //sendPullRequestClosedEmail()
-        } else {
-            error 'Failed to merge pull request!'
-            // sendPullRequestfailedEmail()
+    
+    post{
+        success{
+            setBuildStatus("Build succeeded", "SUCCESS");
         }
+
+        failure {
+            setBuildStatus("Build failed", "FAILURE");
+        } 
     }
 }
 
-def sendPullRequestClosedEmail() {
-    emailext subject: 'Pull Request Merged',
-            body: 'The pull request has been Merged.',
-            to: 'example@email.com'
-}
-
-def sendPullRequestfailedEmail() {
-    emailext subject: 'Pull Request Merge Failed',
-            body: 'The pull request Merge has been Failed.',
-            to: 'example@email.com'
+void setBuildStatus(String message, String state) {
+    step([
+        $class: "GitHubCommitStatusSetter",
+        reposSource: [$class: "ManuallyEnteredRepositorySource", url: "https://github.com/tuankiet1709/jenkins-integration.git"],
+        contextSource: [$class: "ManuallyEnteredCommitContextSource", context: "ci/jenkins/build-status"],
+        errorHandlers: [[$class: "ChangingBuildStatusErrorHandler", result: "UNSTABLE"]],
+        statusResultSource: [$class: "ConditionalStatusResultSource", results: [[$class: "AnyBuildResult", message: message, state: state]]]
+    ]);
 }
