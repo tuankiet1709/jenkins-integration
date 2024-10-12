@@ -40,7 +40,7 @@ const products = [{
   "quantity": 81
 }, {
   "id": 10,
-  "product_name": "Test",
+  "product_name": "This is a jenkins test",
   "quantity": 100
 }]
 
