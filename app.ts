@@ -38,6 +38,10 @@ const products = [{
   "id": 9,
   "product_name": "Sugar - Brown, Individual",
   "quantity": 81
+}, {
+  "id": 10,
+  "product_name": "Test",
+  "quantity": 1000
 }]
 
 // set up dependencies
