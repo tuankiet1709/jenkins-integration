@@ -88,16 +88,16 @@ pipeline {
                 // Add any deployment-specific commands here
             }
         }
+    }
     
-        post{
-            success{
-                setBuildStatus("Build succeeded", "SUCCESS");
-            }
-
-            failure {
-                setBuildStatus("Build failed", "FAILURE");
-            } 
+    post{
+        success{
+            setBuildStatus("Build succeeded", "SUCCESS");
         }
+
+        failure {
+            setBuildStatus("Build failed", "FAILURE");
+        } 
     }
 }
 
