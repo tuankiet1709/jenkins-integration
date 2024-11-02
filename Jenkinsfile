@@ -21,23 +21,23 @@ pipeline {
             }
         }
 
-        stage('Tag Commit') {
-            when {
-                branch 'main' // Only tag if on the main branch
-            }
-            steps {
-                script {
-                    // Get the short commit hash for tagging
-                    env.GIT_COMMIT_TAG = sh(returnStdout: true, script: 'git rev-parse --short HEAD').trim()
+        // stage('Tag Commit') {
+        //     when {
+        //         branch 'main' // Only tag if on the main branch
+        //     }
+        //     steps {
+        //         script {
+        //             // Get the short commit hash for tagging
+        //             env.GIT_COMMIT_TAG = sh(returnStdout: true, script: 'git rev-parse --short HEAD').trim()
                     
-                    // Tag the current commit with the format v-<short_commit_hash>
-                    sh "git tag -a v-${GIT_COMMIT_TAG} -m 'Tagging commit with v-${GIT_COMMIT_TAG}'"
+        //             // Tag the current commit with the format v-<short_commit_hash>
+        //             sh "git tag -a v-${GIT_COMMIT_TAG} -m 'Tagging commit with v-${GIT_COMMIT_TAG}'"
                     
-                    // Push the tag to the remote repository
-                    sh 'git push origin --tags'
-                }
-            }
-        }
+        //             // Push the tag to the remote repository
+        //             sh 'git push origin --tags'
+        //         }
+        //     }
+        // }
 
         // stage("Docker Build") {
         //     when {
@@ -79,15 +79,15 @@ pipeline {
         //     }
         // }
 
-        // stage("Deploy") {
-        //     when {
-        //         branch 'main'
-        //     }
-        //     steps {
-        //         sh 'echo "Deploying App"'
-        //         // Add any deployment-specific commands here
-        //     }
-        // }
+        stage("Deploy") {
+            when {
+                branch 'main'
+            }
+            steps {
+                sh 'echo "Deploying App"'
+                // Add any deployment-specific commands here
+            }
+        }
     }
     
     post{
