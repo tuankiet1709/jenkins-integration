@@ -16,8 +16,8 @@ pipeline {
         stage("build"){
             steps {
                 sh 'echo "Build Started"'
-                sh 'npm install' 
-                sh 'npm run build' 
+                // sh 'npm install' 
+                // sh 'npm run build' 
             }
         }
 
@@ -39,55 +39,55 @@ pipeline {
             }
         }
 
-        stage("Docker Build") {
-            when {
-                branch 'main'
-            }
-            steps {
-                script {
-                    // Use the Git tag as the Docker image tag
-                    docker.build("${ECR_REPO_URI}:${GIT_COMMIT_TAG}")
-                }
-            }
-        }
+        // stage("Docker Build") {
+        //     when {
+        //         branch 'main'
+        //     }
+        //     steps {
+        //         script {
+        //             // Use the Git tag as the Docker image tag
+        //             docker.build("${ECR_REPO_URI}:${GIT_COMMIT_TAG}")
+        //         }
+        //     }
+        // }
 
-        stage('Login to ECR') {
-            when {
-                branch 'main'
-            }
-            steps {
-                script {
-                    withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', credentialsId: AWS_CREDENTIALS_ID]]) {
-                        // Authenticate Docker with ECR
-                        sh '''
-                        aws ecr get-login-password --region us-west-2 | docker login --username AWS --password-stdin ${ECR_REPO_URI}
-                        '''
-                    }
-                }
-            }
-        }
+        // stage('Login to ECR') {
+        //     when {
+        //         branch 'main'
+        //     }
+        //     steps {
+        //         script {
+        //             withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', credentialsId: AWS_CREDENTIALS_ID]]) {
+        //                 // Authenticate Docker with ECR
+        //                 sh '''
+        //                 aws ecr get-login-password --region us-west-2 | docker login --username AWS --password-stdin ${ECR_REPO_URI}
+        //                 '''
+        //             }
+        //         }
+        //     }
+        // }
 
-        stage("Push to ECR") {
-            when {
-                branch 'main'
-            }
-            steps {
-                script {
-                    // Push the Docker image with the commit tag to ECR
-                    docker.image("${ECR_REPO_URI}:${GIT_COMMIT_TAG}").push()
-                }
-            }
-        }
+        // stage("Push to ECR") {
+        //     when {
+        //         branch 'main'
+        //     }
+        //     steps {
+        //         script {
+        //             // Push the Docker image with the commit tag to ECR
+        //             docker.image("${ECR_REPO_URI}:${GIT_COMMIT_TAG}").push()
+        //         }
+        //     }
+        // }
 
-        stage("Deploy") {
-            when {
-                branch 'main'
-            }
-            steps {
-                sh 'echo "Deploying App"'
-                // Add any deployment-specific commands here
-            }
-        }
+        // stage("Deploy") {
+        //     when {
+        //         branch 'main'
+        //     }
+        //     steps {
+        //         sh 'echo "Deploying App"'
+        //         // Add any deployment-specific commands here
+        //     }
+        // }
     }
     
     post{
