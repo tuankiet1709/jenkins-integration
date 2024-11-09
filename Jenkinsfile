@@ -4,6 +4,7 @@ pipeline {
         AWS_CREDENTIALS_ID = 'microdevhub_aws'
         ECR_REPO_URI = 'public.ecr.aws/h7q5l7b8/microdevhub-test'
         IMAGE_TAG = "${env.GIT_COMMIT}"
+        NVM_DIR = '/var/lib/jenkins/.nvm'
     }
     stages {
         stage('configuration') {
